@@ -11,9 +11,9 @@ import { jwtForLogIn } from "../../libs/jwt";
 
 export const signUpController = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { userName, email, password, userType } = req.body;
+    const { userName, email, password } = req.body;
 
-    if (!userName || !email || !password || !userType) {
+    if (!userName || !email || !password) {
       res.status(400);
       throw new Error("Incomplete body");
     }
@@ -25,10 +25,15 @@ export const signUpController = async (req: Request, res: Response, next: NextFu
 
     // checking if account already existed
     const accountsInDatabase: Array<User> = await UserSchema.find({ email: clientData.email });
+    const accountsInDatabase2: Array<User> = await UserSchema.find({ userName: clientData.userName });
 
     // console.log(userNamesInDatabase,workaccountsInDatabase)
     if (accountsInDatabase.length !== 0) {
+      console.log("Account creation failed email already exist")
       res.status(409).json({ message: "Account with this email already exist" });
+    } else if (accountsInDatabase2.length !== 0) {
+      console.log("Account creation failed username already exist");
+      res.status(409).json({ message: "Account with this username already exist" });
     } else {
       // saving data in database
       const savedDocument: User = await UserSchema.create(clientData);
@@ -38,7 +43,7 @@ export const signUpController = async (req: Request, res: Response, next: NextFu
       // sending confirmation email
       await sendConfirmationMessage({ to: req.body.user.email, subject: "Itirena Account Confirmation Email" }, req.body.user._id);
 
-      res.status(200).json({ isAccountCreated: true });
+      res.status(200).json({ message: "Account created succesfully check email to verify account" });
     }
   } catch (error) {
     console.log(error);
@@ -116,8 +121,7 @@ export const changePasswordController = async (req: Request, res: Response, next
             throw new Error("Current password incorrect");
           }
 
-          console.log("Password correct")
-
+          console.log("Password correct");
         }
       } else {
         res.status(400);

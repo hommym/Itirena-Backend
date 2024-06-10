@@ -21,8 +21,8 @@ const mongoose_1 = require("../../libs/mongoose");
 const jwt_1 = require("../../libs/jwt");
 const signUpController = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { userName, email, password, userType } = req.body;
-        if (!userName || !email || !password || !userType) {
+        const { userName, email, password } = req.body;
+        if (!userName || !email || !password) {
             res.status(400);
             throw new Error("Incomplete body");
         }
@@ -31,9 +31,15 @@ const signUpController = (req, res, next) => __awaiter(void 0, void 0, void 0, f
         clientData.password = yield bcrypt_1.default.hash(clientData.password, 10);
         // checking if account already existed
         const accountsInDatabase = yield userSchema_1.UserSchema.find({ email: clientData.email });
+        const accountsInDatabase2 = yield userSchema_1.UserSchema.find({ userName: clientData.userName });
         // console.log(userNamesInDatabase,workaccountsInDatabase)
         if (accountsInDatabase.length !== 0) {
+            console.log("Account creation failed email already exist");
             res.status(409).json({ message: "Account with this email already exist" });
+        }
+        else if (accountsInDatabase2.length !== 0) {
+            console.log("Account creation failed username already exist");
+            res.status(409).json({ message: "Account with this username already exist" });
         }
         else {
             // saving data in database
@@ -42,7 +48,7 @@ const signUpController = (req, res, next) => __awaiter(void 0, void 0, void 0, f
             req.body.user = savedDocument;
             // sending confirmation email
             yield (0, nodemailer_1.sendConfirmationMessage)({ to: req.body.user.email, subject: "Itirena Account Confirmation Email" }, req.body.user._id);
-            res.status(200).json({ isAccountCreated: true });
+            res.status(200).json({ message: "Account created succesfully check email to verify account" });
         }
     }
     catch (error) {
