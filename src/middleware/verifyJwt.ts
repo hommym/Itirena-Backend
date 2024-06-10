@@ -31,6 +31,7 @@ export const verifyJwt = (req: Request, res: Response, next: NextFunction) => {
 
     next();
   } catch (error) {
+    res.status(401)
     next(error);
   }
 };

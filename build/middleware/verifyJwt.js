@@ -32,6 +32,7 @@ const verifyJwt = (req, res, next) => {
         next();
     }
     catch (error) {
+        res.status(401);
         next(error);
     }
 };
