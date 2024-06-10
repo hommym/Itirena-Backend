@@ -21,7 +21,7 @@ const app = (0, express_1.default)();
 // middlewares
 app.use(express_1.default.json());
 // routes
-app.use("/api/auth", authRoutes_1.authRouter);
+app.use("/api/v1/auth/", authRoutes_1.authRouter);
 // error handling middlware
 const port = process.env.PORT ? process.env.PORT : 8000;
 const startServer = () => __awaiter(void 0, void 0, void 0, function* () {

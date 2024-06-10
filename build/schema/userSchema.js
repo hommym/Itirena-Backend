@@ -23,11 +23,6 @@ const userSchema = new mongoose_1.default.Schema({
         type: String,
     },
     // norm for normal users and dev is for developers wanting to use my api's
-    userType: {
-        type: String,
-        required: true,
-        enum: ["norm", "dev"],
-    },
     verfCode: {
         type: Number,
         default: 0,

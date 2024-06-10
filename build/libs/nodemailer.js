@@ -35,7 +35,7 @@ const sendConfirmationMessage = (emailData, id) => __awaiter(void 0, void 0, voi
     yield userSchema_1.UserSchema.updateOne({ _id: id }, { $set: { verfCode: randomNumberForVerfCode } });
     console.log("Verfication code for account set..");
     //   setting message
-    emailData.text = ` Hi thank you for registering for MovieMania Account \n\n To complete the account creation process please click the link below \n \n ${process.env.BaseUrl}/api/auth/account-confirmation/${(0, jwt_1.jwtForSignUp)(String(id), randomNumberForVerfCode)}`;
+    emailData.text = ` Hi thank you for registering for Itirena Account \n\n To complete the account creation process please click the link below \n \n ${process.env.BaseUrl}/api/auth/account-confirmation/${(0, jwt_1.jwtForSignUp)(String(id), randomNumberForVerfCode)}`;
     // sending mail
     yield transporter.sendMail(emailData);
     console.log("Confirmation email sent");

@@ -15,7 +15,7 @@ app.use(express.json());
 
 
 // routes
-app.use("/api/auth/v1",authRouter)
+app.use("/api/v1/auth/",authRouter)
 
 
 // error handling middlware

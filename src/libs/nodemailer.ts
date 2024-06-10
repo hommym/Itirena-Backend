@@ -26,7 +26,7 @@ export const sendConfirmationMessage = async (emailData: mailObject, id: Types.O
   console.log("Verfication code for account set..");
 
 //   setting message
-  emailData.text = ` Hi thank you for registering for MovieMania Account \n\n To complete the account creation process please click the link below \n \n ${process.env.BaseUrl}/api/auth/account-confirmation/${jwtForSignUp(
+  emailData.text = ` Hi thank you for registering for Itirena Account \n\n To complete the account creation process please click the link below \n \n ${process.env.BaseUrl}/api/auth/account-confirmation/${jwtForSignUp(
     String(id),
     randomNumberForVerfCode
   )}`;
