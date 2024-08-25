@@ -19,130 +19,101 @@ const bcrypt_1 = __importDefault(require("bcrypt"));
 const nodemailer_1 = require("../../libs/nodemailer");
 const mongoose_1 = require("../../libs/mongoose");
 const jwt_1 = require("../../libs/jwt");
-const signUpController = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const { userName, email, password } = req.body;
-        if (!userName || !email || !password) {
-            res.status(400);
-            throw new Error("Incomplete body");
-        }
-        const clientData = req.body;
-        // hashing password
-        clientData.password = yield bcrypt_1.default.hash(clientData.password, 10);
-        // checking if account already existed
-        const accountsInDatabase = yield userSchema_1.UserSchema.find({ email: clientData.email });
-        const accountsInDatabase2 = yield userSchema_1.UserSchema.find({ userName: clientData.userName });
-        // console.log(userNamesInDatabase,workaccountsInDatabase)
-        if (accountsInDatabase.length !== 0) {
-            console.log("Account creation failed email already exist");
-            res.status(409).json({ message: "Account with this email already exist" });
-        }
-        else if (accountsInDatabase2.length !== 0) {
-            console.log("Account creation failed username already exist");
-            res.status(409).json({ message: "Account with this username already exist" });
+const express_async_handler_1 = __importDefault(require("express-async-handler"));
+const AppError_1 = require("../../components/AppError");
+const logger_1 = require("../../components/logger");
+exports.signUpController = (0, express_async_handler_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const { userName, email, password } = req.body;
+    if (!userName || !email || !password) {
+        res.status(400);
+        throw new AppError_1.AppError(`{errType:"Request Error",message:"No data passed for ${(!userName) ? "username" : (!email) ? "email" : "password"} "}`);
+    }
+    const clientData = req.body;
+    // hashing password
+    clientData.password = yield bcrypt_1.default.hash(clientData.password, 10);
+    // checking if account already existed
+    const accountsInDatabase = yield userSchema_1.UserSchema.find({ email: clientData.email });
+    const accountsInDatabase2 = yield userSchema_1.UserSchema.find({ userName: clientData.userName });
+    // loger(userNamesInDatabase,workaccountsInDatabase)
+    if (accountsInDatabase.length !== 0) {
+        (0, logger_1.loger)("Account creation failed email already exist");
+        res.status(409).json({ message: "Account with this email already exist" });
+    }
+    else if (accountsInDatabase2.length !== 0) {
+        (0, logger_1.loger)("Account creation failed username already exist");
+        res.status(409).json({ message: "Account with this username already exist" });
+    }
+    else {
+        // saving data in database
+        const savedDocument = yield userSchema_1.UserSchema.create(clientData);
+        (0, logger_1.loger)("account created successfully");
+        req.body.user = savedDocument;
+        // sending confirmation email
+        yield (0, nodemailer_1.sendConfirmationMessage)({ to: req.body.user.email, subject: "Itirena Account Confirmation Email" }, req.body.user._id);
+        res.status(200).json({ message: "Account created succesfully check email to verify account" });
+    }
+}));
+exports.accountConfirmationController = (0, express_async_handler_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    yield userSchema_1.UserSchema.updateOne({ _id: (0, mongoose_1.tObjectId)(req.body.id) }, { $set: { isVerified: true, verfCode: 0 } });
+    res.status(200).json({ message: "User Account Verified successfully" });
+}));
+exports.loginController = (0, express_async_handler_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const { password } = req.body;
+    if (!password) {
+        res.status(400);
+        throw new Error("Bad request invalid request body");
+    }
+    const logInDetails = req.body;
+    (0, logger_1.loger)("Checking if password is correct...");
+    const isPasswordCorrect = yield bcrypt_1.default.compare(logInDetails.password, req.body.hashedPassword);
+    if (!isPasswordCorrect) {
+        (0, logger_1.loger)("Password Invalid");
+        res.status(409);
+        throw new Error("Invalid email and password");
+    }
+    (0, logger_1.loger)("Password Correct");
+    (0, logger_1.loger)("User Authorized");
+    // creating jwt for authorized use
+    res.status(200).json({ message: "Login successful", token: (0, jwt_1.jwtForLogIn)(req.body.id) });
+}));
+exports.resetPasswordController = (0, express_async_handler_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    // sending account reset email
+    yield (0, nodemailer_1.sendResetPasswordEmail)({ to: req.body.email, subject: "Itirena Password Reset Email" }, req.body.id);
+    res.status(200).json({ message: "Email sent click on the link to reset password" });
+}));
+exports.changePasswordController = (0, express_async_handler_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const { newPassword, oldPassword } = req.body;
+    (0, logger_1.loger)("A User is about to reset password");
+    if (!newPassword) {
+        res.status(400);
+        throw new AppError_1.AppError(`errType:"Request Error", message:"No data passed for newPassword in the body"`);
+    }
+    // checking if there is an oldPassword to compare if is correct with the one in database in request
+    if (req.url === "/change-password") {
+        if (oldPassword) {
+            (0, logger_1.loger)("Checking if password is correct...");
+            const userData = yield userSchema_1.UserSchema.findById(req.body.id);
+            if (userData !== null) {
+                const isPasswordCorrect = yield bcrypt_1.default.compare(oldPassword, userData.password);
+                if (!isPasswordCorrect) {
+                    (0, logger_1.loger)("Password Invalid");
+                    res.status(409);
+                    throw new AppError_1.AppError(`errType:"Auth Error" ,message:"Incorrect password" `);
+                }
+                (0, logger_1.loger)("Password correct");
+            }
         }
         else {
-            // saving data in database
-            const savedDocument = yield userSchema_1.UserSchema.create(clientData);
-            console.log("account created successfully");
-            req.body.user = savedDocument;
-            // sending confirmation email
-            yield (0, nodemailer_1.sendConfirmationMessage)({ to: req.body.user.email, subject: "Itirena Account Confirmation Email" }, req.body.user._id);
-            res.status(200).json({ message: "Account created succesfully check email to verify account" });
-        }
-    }
-    catch (error) {
-        console.log(error);
-        next(error);
-    }
-});
-exports.signUpController = signUpController;
-const accountConfirmationController = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        // updating user data
-        yield userSchema_1.UserSchema.updateOne({ _id: (0, mongoose_1.tObjectId)(req.body.id) }, { $set: { isVerified: true, verfCode: 0 } });
-        res.status(200).json({ message: "User Account Verified successfully" });
-    }
-    catch (error) {
-        next(error);
-    }
-});
-exports.accountConfirmationController = accountConfirmationController;
-const loginController = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const { password } = req.body;
-        if (!password) {
             res.status(400);
-            throw new Error("Bad request invalid request body");
+            throw new AppError_1.AppError(`errType:"Request Error" , message:"No data passed for oldPassword in the body"`);
         }
-        const logInDetails = req.body;
-        console.log("Checking if password is correct...");
-        const isPasswordCorrect = yield bcrypt_1.default.compare(logInDetails.password, req.body.hashedPassword);
-        if (!isPasswordCorrect) {
-            console.log("Password Invalid");
-            res.status(409);
-            throw new Error("Invalid email and password");
-        }
-        console.log("Password Correct");
-        console.log("User Authorized");
-        // creating jwt for authorized use
-        res.status(200).json({ message: "Login successful", token: (0, jwt_1.jwtForLogIn)(req.body.id) });
     }
-    catch (error) {
-        next(error);
-    }
-});
-exports.loginController = loginController;
-const resetPasswordController = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        // sending account reset email
-        yield (0, nodemailer_1.sendResetPasswordEmail)({ to: req.body.email, subject: "Itirena Password Reset Email" }, req.body.id);
-        res.status(200).json({ message: "Email sent click on the link to reset password" });
-    }
-    catch (error) {
-        next(error);
-    }
-});
-exports.resetPasswordController = resetPasswordController;
-const changePasswordController = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    const { newPassword, oldPassword } = req.body;
-    console.log("A User is about to reset password");
-    try {
-        if (!newPassword) {
-            res.status(400);
-            throw new Error("Bad request invalid request body,newPassword undefined");
-        }
-        // checking if there is an oldPassword to compare if is correct with the one in database in request
-        if (req.url === "/change-password") {
-            if (oldPassword) {
-                console.log("Checking if password is correct...");
-                const userData = yield userSchema_1.UserSchema.findById(req.body.id);
-                if (userData !== null) {
-                    const isPasswordCorrect = yield bcrypt_1.default.compare(oldPassword, userData.password);
-                    if (!isPasswordCorrect) {
-                        console.log("Password Invalid");
-                        res.status(409);
-                        throw new Error("Current password incorrect");
-                    }
-                    console.log("Password correct");
-                }
-            }
-            else {
-                res.status(400);
-                throw new Error("Bad request invalid request body,oldPassword undefined");
-            }
-        }
-        // hashing new password
-        console.log("Hashing new passwprd....");
-        const hashedPassword = yield bcrypt_1.default.hash(newPassword, 10);
-        console.log("Password hashed");
-        console.log("Updating user password....");
-        yield userSchema_1.UserSchema.updateOne({ _id: (0, mongoose_1.tObjectId)(req.body.id) }, { $set: { password: hashedPassword } });
-        console.log("User password updated");
-        res.status(200).json({ message: "User password updated successfully" });
-    }
-    catch (error) {
-        next(error);
-    }
-});
-exports.changePasswordController = changePasswordController;
+    // hashing new password
+    (0, logger_1.loger)("Hashing new passwprd....");
+    const hashedPassword = yield bcrypt_1.default.hash(newPassword, 10);
+    (0, logger_1.loger)("Password hashed");
+    (0, logger_1.loger)("Updating user password....");
+    yield userSchema_1.UserSchema.updateOne({ _id: (0, mongoose_1.tObjectId)(req.body.id) }, { $set: { password: hashedPassword } });
+    (0, logger_1.loger)("User password updated");
+    res.status(200).json({ message: "User password updated successfully" });
+}));

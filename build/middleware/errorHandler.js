@@ -10,12 +10,20 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.errorHandler = void 0;
+const AppError_1 = require("../components/AppError");
 const errorHandler = (err, req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    if (res.statusCode >= 200 && res.statusCode < 400) {
-        res.json({ message: err });
+    try {
+        if (res.statusCode >= 200 && res.statusCode < 400 && err instanceof AppError_1.AppError) {
+            // converting json in string form in json object
+            const jsonErrorMessage = JSON.parse(err.msg);
+            res.json(jsonErrorMessage);
+        }
+        else {
+            res.json({ error: err.message });
+        }
     }
-    else {
-        res.json({ error: err.message });
+    catch (error) {
+        res.json({ error: "The message passed in AppError object is not in json format" });
     }
 });
 exports.errorHandler = errorHandler;
