@@ -17,18 +17,26 @@ const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 const mongoose_1 = require("./libs/mongoose");
 const authRoutes_1 = require("./routes/auth/authRoutes");
+const errorHandler_1 = require("./middleware/errorHandler");
+const swagger_ui_express_1 = __importDefault(require("swagger-ui-express"));
+const swaggerConfig_1 = require("./swaggerConfig");
+const logger_1 = require("./components/logger");
 const app = (0, express_1.default)();
+// setting up swagger-ui
+app.use("/api-docs", swagger_ui_express_1.default.serve, swagger_ui_express_1.default.setup(swaggerConfig_1.swaggerSpecs));
 // middlewares
 app.use(express_1.default.json());
 // routes
 app.use("/api/v1/auth/", authRoutes_1.authRouter);
 // error handling middlware
+app.use(errorHandler_1.errorHandler);
 const port = process.env.PORT ? process.env.PORT : 8000;
 const startServer = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
         yield (0, mongoose_1.connectToDatabase)(process.env.MongoDbConnectionUrl);
         app.listen(port, () => {
             console.log(`Server  is listening on ${port} `);
+            (0, logger_1.loger)(swaggerConfig_1.swaggerSpecs);
         });
     }
     catch (error) {

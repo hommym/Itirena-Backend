@@ -26,7 +26,7 @@ exports.signUpController = (0, express_async_handler_1.default)((req, res, next)
     const { userName, email, password } = req.body;
     if (!userName || !email || !password) {
         res.status(400);
-        throw new AppError_1.AppError(`{errType:"Request Error",message:"No data passed for ${(!userName) ? "username" : (!email) ? "email" : "password"} "}`);
+        throw new AppError_1.AppError(`{"errType":"Request Error","message":"No data passed for ${(!userName) ? "username" : (!email) ? "email" : "password"} "}`);
     }
     const clientData = req.body;
     // hashing password
@@ -50,7 +50,7 @@ exports.signUpController = (0, express_async_handler_1.default)((req, res, next)
         req.body.user = savedDocument;
         // sending confirmation email
         yield (0, nodemailer_1.sendConfirmationMessage)({ to: req.body.user.email, subject: "Itirena Account Confirmation Email" }, req.body.user._id);
-        res.status(200).json({ message: "Account created succesfully check email to verify account" });
+        res.status(201).json({ message: "Account created succesfully check email to verify account" });
     }
 }));
 exports.accountConfirmationController = (0, express_async_handler_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
@@ -61,7 +61,7 @@ exports.loginController = (0, express_async_handler_1.default)((req, res, next) 
     const { password } = req.body;
     if (!password) {
         res.status(400);
-        throw new Error("Bad request invalid request body");
+        throw new AppError_1.AppError(`{"errType":"Request Error" ,"message":"No data passed for password in the body"}`);
     }
     const logInDetails = req.body;
     (0, logger_1.loger)("Checking if password is correct...");
@@ -69,12 +69,12 @@ exports.loginController = (0, express_async_handler_1.default)((req, res, next) 
     if (!isPasswordCorrect) {
         (0, logger_1.loger)("Password Invalid");
         res.status(409);
-        throw new Error("Invalid email and password");
+        throw new AppError_1.AppError(`{"errType":"Auth Error","message":"Invalid email and password"}`);
     }
     (0, logger_1.loger)("Password Correct");
     (0, logger_1.loger)("User Authorized");
     // creating jwt for authorized use
-    res.status(200).json({ message: "Login successful", token: (0, jwt_1.jwtForLogIn)(req.body.id) });
+    res.status(201).json({ message: "Login successful", token: (0, jwt_1.jwtForLogIn)(req.body.id) });
 }));
 exports.resetPasswordController = (0, express_async_handler_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     // sending account reset email
@@ -86,7 +86,7 @@ exports.changePasswordController = (0, express_async_handler_1.default)((req, re
     (0, logger_1.loger)("A User is about to reset password");
     if (!newPassword) {
         res.status(400);
-        throw new AppError_1.AppError(`errType:"Request Error", message:"No data passed for newPassword in the body"`);
+        throw new AppError_1.AppError(`{"errType":"Request Error", "message":"No data passed for newPassword in the body"}`);
     }
     // checking if there is an oldPassword to compare if is correct with the one in database in request
     if (req.url === "/change-password") {
@@ -98,14 +98,14 @@ exports.changePasswordController = (0, express_async_handler_1.default)((req, re
                 if (!isPasswordCorrect) {
                     (0, logger_1.loger)("Password Invalid");
                     res.status(409);
-                    throw new AppError_1.AppError(`errType:"Auth Error" ,message:"Incorrect password" `);
+                    throw new AppError_1.AppError(`{"errType":"Auth Error" ,"message":"Incorrect password" }`);
                 }
                 (0, logger_1.loger)("Password correct");
             }
         }
         else {
             res.status(400);
-            throw new AppError_1.AppError(`errType:"Request Error" , message:"No data passed for oldPassword in the body"`);
+            throw new AppError_1.AppError(`{"errType":"Request Error" , "message":"No data passed for oldPassword in the body"}`);
         }
     }
     // hashing new password

@@ -11,12 +11,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.verifyUserEmail = void 0;
 const userSchema_1 = require("../schema/userSchema");
+const AppError_1 = require("../components/AppError");
 const verifyUserEmail = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     console.log("A User is been Authenticated...");
     try {
         if (!req.body.email) {
             res.status(400);
-            throw new Error("Bad request invalid request body");
+            throw new AppError_1.AppError(`{"errType":"Request Error" ,"message":"No data passed for password in the body"}`);
         }
         // checking if an account with this email exist
         console.log("User email verification started ...");
@@ -25,9 +26,9 @@ const verifyUserEmail = (req, res, next) => __awaiter(void 0, void 0, void 0, fu
             console.log("No Account with this  email  exist");
             res.status(409);
             if (!req.body.password) {
-                throw new Error("No account with this email exist");
+                throw new AppError_1.AppError(`{"errType":"Request Error" ,"message":"No data passed for password in the body"}`);
             }
-            throw new Error("Invalid email and password");
+            throw new AppError_1.AppError(`{"errType":"Auth Error" ,"message":"Invalid email and password"}`);
         }
         console.log("An account with user email exist");
         // setting id and hashed passwords in the req.body for later use in the next middleware

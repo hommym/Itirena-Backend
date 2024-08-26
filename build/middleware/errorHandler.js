@@ -13,7 +13,7 @@ exports.errorHandler = void 0;
 const AppError_1 = require("../components/AppError");
 const errorHandler = (err, req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        if (res.statusCode >= 200 && res.statusCode < 400 && err instanceof AppError_1.AppError) {
+        if (err instanceof AppError_1.AppError) {
             // converting json in string form in json object
             const jsonErrorMessage = JSON.parse(err.msg);
             res.json(jsonErrorMessage);

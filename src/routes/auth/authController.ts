@@ -12,12 +12,13 @@ import asyncHandler from "express-async-handler";
 import { AppError } from "../../components/AppError";
 import { loger } from "../../components/logger";
 
+
 export const signUpController = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
    const { userName, email, password } = req.body;
 
    if (!userName || !email || !password) {
      res.status(400);
-     throw new AppError(`{errType:"Request Error",message:"No data passed for ${(!userName)?"username":(!email)?"email":"password"} "}`);
+     throw new AppError(`{"errType":"Request Error","message":"No data passed for ${(!userName)?"username":(!email)?"email":"password"} "}`);
    }
 
    const clientData: User = req.body;
@@ -45,9 +46,13 @@ export const signUpController = asyncHandler(async (req: Request, res: Response,
      // sending confirmation email
      await sendConfirmationMessage({ to: req.body.user.email, subject: "Itirena Account Confirmation Email" }, req.body.user._id);
 
-     res.status(200).json({ message: "Account created succesfully check email to verify account" });
+     res.status(201).json({ message: "Account created succesfully check email to verify account" });
    }
 })
+
+
+
+
 
 export const accountConfirmationController = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
   await UserSchema.updateOne({ _id: tObjectId(req.body.id) }, { $set: { isVerified: true, verfCode: 0 } });
@@ -58,7 +63,7 @@ export const loginController = asyncHandler(async (req: Request, res: Response, 
    const { password } = req.body;
    if (!password) {
      res.status(400);
-     throw new Error("Bad request invalid request body");
+     throw new AppError(`{"errType":"Request Error" ,"message":"No data passed for password in the body"}`);
    }
    const logInDetails: loginCredentials = req.body;
 
@@ -68,12 +73,12 @@ export const loginController = asyncHandler(async (req: Request, res: Response, 
    if (!isPasswordCorrect) {
      loger("Password Invalid");
      res.status(409);
-     throw new Error("Invalid email and password");
+     throw new AppError(`{"errType":"Auth Error","message":"Invalid email and password"}`);
    }
    loger("Password Correct");
    loger("User Authorized");
    // creating jwt for authorized use
-   res.status(200).json({ message: "Login successful", token: jwtForLogIn(req.body.id) });
+   res.status(201).json({ message: "Login successful", token: jwtForLogIn(req.body.id) });
 })
 
 export const resetPasswordController = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
@@ -87,7 +92,7 @@ export const changePasswordController = asyncHandler(async (req: Request, res: R
   loger("A User is about to reset password");
    if (!newPassword) {
      res.status(400);
-     throw new AppError(`errType:"Request Error", message:"No data passed for newPassword in the body"`);
+     throw new AppError(`{"errType":"Request Error", "message":"No data passed for newPassword in the body"}`);
    }
    // checking if there is an oldPassword to compare if is correct with the one in database in request
    if (req.url === "/change-password") {
@@ -101,13 +106,13 @@ export const changePasswordController = asyncHandler(async (req: Request, res: R
          if (!isPasswordCorrect) {
            loger("Password Invalid");
            res.status(409);
-           throw new AppError(`errType:"Auth Error" ,message:"Incorrect password" `);
+           throw new AppError(`{"errType":"Auth Error" ,"message":"Incorrect password" }`);
          }
          loger("Password correct");
        }
      } else {
        res.status(400);
-       throw new AppError(`errType:"Request Error" , message:"No data passed for oldPassword in the body"`);
+       throw new AppError(`{"errType":"Request Error" , "message":"No data passed for oldPassword in the body"}`);
      }
    }
 
