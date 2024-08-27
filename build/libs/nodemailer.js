@@ -17,6 +17,7 @@ const nodemailer_1 = __importDefault(require("nodemailer"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const userSchema_1 = require("../schema/userSchema");
 const jwt_1 = require("./jwt");
+const logger_1 = require("../components/logger");
 dotenv_1.default.config();
 const transporter = nodemailer_1.default.createTransport({
     service: "Gmail",
@@ -30,15 +31,15 @@ const transporter = nodemailer_1.default.createTransport({
 });
 const sendConfirmationMessage = (emailData, id) => __awaiter(void 0, void 0, void 0, function* () {
     // creating confirmation message with onfirmation url
-    const randomNumberForVerfCode = Math.floor(Math.random() * 90000) + 10000;
+    const randomNumberForVerfCode = Math.floor(Math.random() * 9000) + 1000;
     // setting verfCode
     yield userSchema_1.UserSchema.updateOne({ _id: id }, { $set: { verfCode: randomNumberForVerfCode } });
-    console.log("Verfication code for account set..");
+    (0, logger_1.loger)("Verfication code for account set..");
     //   setting message
-    emailData.text = ` Hi thank you for registering for Itirena Account \n\n To complete the account creation process please click the link below \n \n ${process.env.BaseUrl}/api/auth/account-confirmation/${(0, jwt_1.jwtForSignUp)(String(id), randomNumberForVerfCode)}`;
+    emailData.text = ` Hi thank you for registering for Itirena Account .\n\n The Four(4) digit verification code for your account confirmation is ${randomNumberForVerfCode}`;
     // sending mail
     yield transporter.sendMail(emailData);
-    console.log("Confirmation email sent");
+    (0, logger_1.loger)("Confirmation email sent");
 });
 exports.sendConfirmationMessage = sendConfirmationMessage;
 const sendResetPasswordEmail = (emailData, id) => __awaiter(void 0, void 0, void 0, function* () {

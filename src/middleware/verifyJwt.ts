@@ -1,6 +1,7 @@
 // Custom data types
 import { Request, Response, NextFunction } from "express";
 import { verifyToken } from "../libs/jwt";
+import { AppError } from "../components/AppError";
 
 export const verifyJwt = (req: Request, res: Response, next: NextFunction) => {
   let jwtData = null;
@@ -15,18 +16,19 @@ export const verifyJwt = (req: Request, res: Response, next: NextFunction) => {
     } else if (req.headers !== undefined && req.headers.authorization !== undefined) {
       if (!req.headers.authorization.startsWith("Bearer ")) {
         res.status(400)
-        throw new Error("Bad Request Bearer scheme not found");
+        throw new Error(`{"errType":"Request Error" ,"message":" Bearer scheme not found"}`);
       }
 
       jwtData = verifyToken(req.headers.authorization.split(" ")[1]);
       if(!jwtData.userId){
          res.status(409);
-         throw new Error("Invalid jwt");
+         throw new AppError(`{"errType":"Auth Error" ,"message":"Invalid Token"}`);
       }
       console.log("Jwt token Verified");
       req.body.id = jwtData.userId;
     } else {
-      throw new Error("Bad Request Authorization Header not defined");
+       res.status(400);
+      throw new AppError(`{"errType":"Request Error" ,"message":"Authorization Header not defined"}`);
     }
 
     next();

@@ -54,8 +54,21 @@ exports.signUpController = (0, express_async_handler_1.default)((req, res, next)
     }
 }));
 exports.accountConfirmationController = (0, express_async_handler_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    yield userSchema_1.UserSchema.updateOne({ _id: (0, mongoose_1.tObjectId)(req.body.id) }, { $set: { isVerified: true, verfCode: 0 } });
-    res.status(200).json({ message: "User Account Verified successfully" });
+    (0, logger_1.loger)("A new account is been verified..");
+    const { id, isVerified } = req.body;
+    if (isVerified) {
+        (0, logger_1.loger)("The Account has already been verified");
+        res.status(201).json({ message: "Account has already been Verified" });
+    }
+    else {
+        const account = yield userSchema_1.UserSchema.findOneAndUpdate({ _id: (0, mongoose_1.tObjectId)(id), verfCode: Number(req.params.verfCode) }, { $set: { isVerified: true, verfCode: 0 } });
+        if (account) {
+            res.status(201).json({ message: "Account Verified successfully" });
+        }
+        else {
+            res.status(201).json({ message: "Verification code Incorrect Account Verification failed" });
+        }
+    }
 }));
 exports.loginController = (0, express_async_handler_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const { password } = req.body;

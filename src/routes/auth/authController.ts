@@ -55,8 +55,25 @@ export const signUpController = asyncHandler(async (req: Request, res: Response,
 
 
 export const accountConfirmationController = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-  await UserSchema.updateOne({ _id: tObjectId(req.body.id) }, { $set: { isVerified: true, verfCode: 0 } });
-  res.status(200).json({ message: "User Account Verified successfully" });
+  loger("A new account is been verified..")
+  const {id,isVerified}= req.body
+
+  if(isVerified){
+    loger("The Account has already been verified")
+    res.status(201).json({ message: "Account has already been Verified" });
+  }
+  else{
+   const account = await UserSchema.findOneAndUpdate({ _id: tObjectId(id), verfCode: Number(req.params.verfCode) }, { $set: { isVerified: true, verfCode: 0 } });
+
+   if(account){
+    res.status(201).json({ message: "Account Verified successfully" });
+   }
+   else{
+    res.status(201).json({ message: "Verification code Incorrect Account Verification failed"});
+   }
+    
+  }
+  
 })
 
 export const loginController = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {

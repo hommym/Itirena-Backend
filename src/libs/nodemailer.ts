@@ -4,6 +4,7 @@ import { mailObject } from "../components/customDataTypes/authDataTypes";
 import { Types } from "mongoose";
 import { UserSchema } from "../schema/userSchema";
 import { jwtForLogIn, jwtForSignUp } from "./jwt";
+import { loger } from "../components/logger";
 dotenv.config();
 
 const transporter = nodeMailer.createTransport({
@@ -19,22 +20,20 @@ const transporter = nodeMailer.createTransport({
 
 export const sendConfirmationMessage = async (emailData: mailObject, id: Types.ObjectId) => {
   // creating confirmation message with onfirmation url
-  const randomNumberForVerfCode = Math.floor(Math.random() * 90000) + 10000;
+  const randomNumberForVerfCode = Math.floor(Math.random() * 9000) + 1000;
+
 
   // setting verfCode
   await UserSchema.updateOne({ _id: id }, { $set: { verfCode: randomNumberForVerfCode } });
-  console.log("Verfication code for account set..");
+  loger("Verfication code for account set..");
 
 //   setting message
-  emailData.text = ` Hi thank you for registering for Itirena Account \n\n To complete the account creation process please click the link below \n \n ${process.env.BaseUrl}/api/auth/account-confirmation/${jwtForSignUp(
-    String(id),
-    randomNumberForVerfCode
-  )}`;
+  emailData.text = ` Hi thank you for registering for Itirena Account .\n\n The Four(4) digit verification code for your account confirmation is ${randomNumberForVerfCode}`;
 
   
 // sending mail
  await transporter.sendMail(emailData)
- console.log("Confirmation email sent")
+ loger("Confirmation email sent")
 };
 
 

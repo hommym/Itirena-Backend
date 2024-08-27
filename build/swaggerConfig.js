@@ -23,6 +23,15 @@ const option = {
                 description: "All operations relating to account",
             },
         ],
+        components: {
+            securitySchemes: {
+                bearerAuth: {
+                    type: "http",
+                    scheme: "bearer",
+                    bearerFormat: "JWT",
+                },
+            },
+        },
     },
     apis: [path_1.default.resolve(__dirname, `./routes/**/*.js`)],
 };
