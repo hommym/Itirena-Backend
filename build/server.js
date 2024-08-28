@@ -21,6 +21,7 @@ const errorHandler_1 = require("./middleware/errorHandler");
 const swagger_ui_express_1 = __importDefault(require("swagger-ui-express"));
 const swaggerConfig_1 = require("./swaggerConfig");
 const logger_1 = require("./components/logger");
+const courseDataRoutes_1 = require("./routes/courseData/courseDataRoutes");
 const app = (0, express_1.default)();
 // setting up swagger-ui
 app.use("/api-docs", swagger_ui_express_1.default.serve, swagger_ui_express_1.default.setup(swaggerConfig_1.swaggerSpecs));
@@ -28,6 +29,7 @@ app.use("/api-docs", swagger_ui_express_1.default.serve, swagger_ui_express_1.de
 app.use(express_1.default.json());
 // routes
 app.use("/api/v1/auth/", authRoutes_1.authRouter);
+app.use("/api/v1/course-data/", courseDataRoutes_1.courseDataRouter);
 // error handling middlware
 app.use(errorHandler_1.errorHandler);
 const port = process.env.PORT ? process.env.PORT : 8000;

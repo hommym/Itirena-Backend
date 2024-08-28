@@ -7,6 +7,7 @@ import { errorHandler } from "./middleware/errorHandler";
 import swaggerUi from "swagger-ui-express";
 import { swaggerSpecs } from "./swaggerConfig";
 import { loger } from "./components/logger";
+import { courseDataRouter } from "./routes/courseData/courseDataRoutes";
 
 const app = express();
 
@@ -18,6 +19,7 @@ app.use(express.json());
 
 // routes
 app.use("/api/v1/auth/", authRouter);
+app.use("/api/v1/course-data/",courseDataRouter)
 
 // error handling middlware
 app.use(errorHandler);
