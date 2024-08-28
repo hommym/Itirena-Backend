@@ -1,5 +1,10 @@
 import mongoose from "mongoose";
 
+// method for getting current year 
+function getCurrentYear(): number {
+  const currentYear = new Date().getFullYear();
+  return currentYear;
+}
 // the userSchema
 const userSchema = new mongoose.Schema({
   userName: {
@@ -14,12 +19,6 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-
-  phone: {
-    type: String,
-  },
-  // norm for normal users and dev is for developers wanting to use my api's
- 
   verfCode: {
     type: Number,
     default: 0,
@@ -28,6 +27,14 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  academicYear:{
+    type:String,
+    default:`${getCurrentYear()-1}/${getCurrentYear()}`
+  },
+  isClassTimeTablePresent:{
+    type:Boolean,
+    default:false
+  }
 });
 
 export const UserSchema = mongoose.model("User", userSchema);

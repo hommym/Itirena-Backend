@@ -5,6 +5,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserSchema = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
+// method for getting current year 
+function getCurrentYear() {
+    const currentYear = new Date().getFullYear();
+    return currentYear;
+}
 // the userSchema
 const userSchema = new mongoose_1.default.Schema({
     userName: {
@@ -19,10 +24,6 @@ const userSchema = new mongoose_1.default.Schema({
         type: String,
         required: true,
     },
-    phone: {
-        type: String,
-    },
-    // norm for normal users and dev is for developers wanting to use my api's
     verfCode: {
         type: Number,
         default: 0,
@@ -31,5 +32,13 @@ const userSchema = new mongoose_1.default.Schema({
         type: Boolean,
         default: false,
     },
+    academicYear: {
+        type: String,
+        default: `${getCurrentYear() - 1}/${getCurrentYear()}`
+    },
+    isClassTimeTablePresent: {
+        type: Boolean,
+        default: false
+    }
 });
 exports.UserSchema = mongoose_1.default.model("User", userSchema);
