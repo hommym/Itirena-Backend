@@ -11,4 +11,6 @@ export interface TimeTable {
   userId: Types.ObjectId;
   timeTableType: string;
   events: Array<Event>;
+  semester:string;
+  academicYear:string;
 }
