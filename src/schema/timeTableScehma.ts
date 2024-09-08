@@ -8,7 +8,9 @@ const timeTableSchema = new mongoose.Schema<TimeTable>({
     type:String,
     enum:["class","personal"]
   },
-  events:Array  
+  events:Array,
+  semester:String,
+  academicYear:String  
 });
 
 

@@ -32,6 +32,8 @@ const timeTableSchema = new mongoose_1.default.Schema({
         type: String,
         enum: ["class", "personal"]
     },
-    events: Array
+    events: Array,
+    semester: String,
+    academicYear: String
 });
 exports.TimeTableSchema = mongoose_1.default.model("TimeTable", timeTableSchema);

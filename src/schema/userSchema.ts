@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 // method for getting current year 
-function getCurrentYear(): number {
+export function getCurrentYear(): number {
   const currentYear = new Date().getFullYear();
   return currentYear;
 }
@@ -31,10 +31,16 @@ const userSchema = new mongoose.Schema({
     type:String,
     default:`${getCurrentYear()-1}/${getCurrentYear()}`
   },
+  programOfStudy:String,
+  currentSemester:Number,
   isClassTimeTablePresent:{
     type:Boolean,
     default:false
-  }
+  },
+  isCourseSlipPresent:{
+    type:Boolean,
+    default:false 
+  },
 });
 
 export const UserSchema = mongoose.model("User", userSchema);

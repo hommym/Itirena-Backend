@@ -3,13 +3,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UserSchema = void 0;
+exports.UserSchema = exports.getCurrentYear = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
 // method for getting current year 
 function getCurrentYear() {
     const currentYear = new Date().getFullYear();
     return currentYear;
 }
+exports.getCurrentYear = getCurrentYear;
 // the userSchema
 const userSchema = new mongoose_1.default.Schema({
     userName: {
@@ -36,9 +37,15 @@ const userSchema = new mongoose_1.default.Schema({
         type: String,
         default: `${getCurrentYear() - 1}/${getCurrentYear()}`
     },
+    programOfStudy: String,
+    currentSemester: Number,
     isClassTimeTablePresent: {
         type: Boolean,
         default: false
-    }
+    },
+    isCourseSlipPresent: {
+        type: Boolean,
+        default: false
+    },
 });
 exports.UserSchema = mongoose_1.default.model("User", userSchema);
