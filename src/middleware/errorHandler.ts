@@ -8,6 +8,9 @@ export const errorHandler=async(err:Error,req:Request,res:Response,next:NextFunc
      if ( err instanceof AppError) {
        // converting json in string form in json object
        const jsonErrorMessage= JSON.parse(err.msg)
+       if(err.statusCode){
+        res.status(err.statusCode)
+       }
        res.json(jsonErrorMessage);
      } else {
        res.json({ error: err.message });

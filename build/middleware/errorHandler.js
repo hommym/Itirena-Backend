@@ -16,6 +16,9 @@ const errorHandler = (err, req, res, next) => __awaiter(void 0, void 0, void 0, 
         if (err instanceof AppError_1.AppError) {
             // converting json in string form in json object
             const jsonErrorMessage = JSON.parse(err.msg);
+            if (err.statusCode) {
+                res.status(err.statusCode);
+            }
             res.json(jsonErrorMessage);
         }
         else {

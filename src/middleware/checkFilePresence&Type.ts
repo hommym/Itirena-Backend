@@ -12,7 +12,7 @@ export const checkFilePresenceAndType = (mimeTypes: Array<string>) => {
     } else {
       loger("Either file is not present or is not of the appropriate type.")
       res.status(400);
-      throw new AppError(req.file ? `{"errType":"Request Error","message":"No File uploaded"}` : `{"errType":"Request Error","message":"File must be an image or pdf"}`);
+      throw new AppError(req.file ? `{"errType":"Request Error","message":"No File uploaded"}` : `{"errType":"Request Error","message":"File must be an image"}`);
     }
   });
 };
