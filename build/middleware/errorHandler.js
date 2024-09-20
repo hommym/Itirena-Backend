@@ -14,11 +14,11 @@ const AppError_1 = require("../components/AppError");
 const errorHandler = (err, req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         if (err instanceof AppError_1.AppError) {
-            // converting json in string form in json object
-            const jsonErrorMessage = JSON.parse(err.msg);
             if (err.statusCode) {
                 res.status(err.statusCode);
             }
+            // converting json in string form in json object
+            const jsonErrorMessage = JSON.parse(err.msg);
             res.json(jsonErrorMessage);
         }
         else {
@@ -26,7 +26,7 @@ const errorHandler = (err, req, res, next) => __awaiter(void 0, void 0, void 0, 
         }
     }
     catch (error) {
-        res.json({ error: "The message passed in AppError object is not in json format" });
+        res.json({ error: err.message });
     }
 });
 exports.errorHandler = errorHandler;

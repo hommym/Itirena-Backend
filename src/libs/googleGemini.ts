@@ -27,7 +27,7 @@ If yes return {"isImageValid":true} and if false return {"isImageValid":false}`;
   const prompt = `
 1.Extract  data from the image and it should be in this in the json format like {"message":"Data sucessfully extracted","courses":[{"courseCode":"data","coursName":"data","credit":"data(should be numeric)"}]
 
-3.If data for course credit  is not present use "N/A" as their data`;
+3.If data for course credit  is not present use 0 as their data`;
 
   
   //   converting img buffer into GoogleGenerativeAI.Part object
