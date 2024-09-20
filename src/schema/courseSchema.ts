@@ -7,10 +7,13 @@ import { Course, CourseData } from "../components/customDataTypes/courseSlipData
 
 // the courseSchema
 const courseSchema = new mongoose.Schema({
+  userId:{
+    type:Types.ObjectId
+  },
   semester: {
     type: String,
     enum: { values: [1, 2], message: "{VALUE} is not valid value for semester field. valid values = 1 or 2" },
-    required: [true, "No data was passed fpr semester field in the request body"],
+    required: [true, "No data was passed for semester field in the request body"],
   },
   academicYear: {
     type: String,
