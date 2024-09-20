@@ -4,13 +4,39 @@ import { loger } from "../../components/logger";
 import { AppError } from "../../components/AppError";
 import { UserSchema } from "../../schema/userSchema";
 import { getInfoFromCourseSlip } from "../../libs/googleGemini";
-import { ModelJsonResponse } from "../../components/customDataTypes/courseSlipDataType";
+import { Course, ModelJsonResponse } from "../../components/customDataTypes/courseSlipDataType";
+import { CourseSchema } from "../../schema/courseSchema";
+import { tObjectId } from "../../libs/mongoose";
+
+// helper methods
+const ValidateDataFormat = (courseData: Array<Course>) => {
+  courseData.forEach((course) => {
+    const { courseCode, courseName, credit } = course;
+    if (!courseCode && !courseName && !credit) throw new AppError("item(s) in courses in the request body is not in the required format", 400);
+  });
+  return true;
+};
 
 export const couseSlipUploadController = asyncHandler(async (req: Request, res: Response) => {
   const { buffer, mimetype } = req.file!;
   let courseDataFromImage: ModelJsonResponse = JSON.parse(await getInfoFromCourseSlip(buffer, mimetype));
   res.status(200).json(courseDataFromImage);
 });
+
+export const courseSlipInfoSaveController = asyncHandler(async (req: Request, res: Response) => {
+  loger("Saving course data...")
+  const { courses, semester, academicYear, id } = req.body;
+
+  if (!courses || !semester || !academicYear) throw new AppError(`No data passed for ${!courses ? "courses" : !semester ? "semester" : "academicYear"}`, 400);
+
+  // checking if the data sent is in th right format
+  if (ValidateDataFormat(courses)) await CourseSchema.findOneAndUpdate({ userId: tObjectId(id), semester, academicYear}, { $set: { userId: tObjectId(id), courses, semester, academicYear } },{upsert:true});
+  loger("Data saved")
+  res.status(201).json({ message: "Course Data saved sucessfully" });
+});
+
+
+
 
 export const timeTableUploadController = asyncHandler(async (req: Request, res: Response) => {
   const imgFile = req.file?.buffer;
@@ -33,5 +59,3 @@ export const timeTableUploadController = asyncHandler(async (req: Request, res: 
 });
 
 export const timeTableInfoSaveController = asyncHandler(async (req: Request, res: Response) => {});
-
-export const courseSlipInfoSaveController = asyncHandler(async (req: Request, res: Response) => {});

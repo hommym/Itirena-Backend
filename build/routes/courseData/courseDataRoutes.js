@@ -13,7 +13,7 @@ exports.courseDataRouter = (0, express_1.Router)();
  * /api/v1/course-data/course-slip/upload:
  *   post:
  *     tags:
- *       - Account
+ *       - Courses
  *     summary: Extract course data from a course slip image
  *     description: This endpoint allows users to upload an image of a course slip to extract the course information. An Authorization header with a JWT token using the Bearer schema is required for the request.
  *     security:
@@ -79,6 +79,7 @@ exports.courseDataRouter = (0, express_1.Router)();
  */
 // endpoint for uploading course registration slip
 exports.courseDataRouter.post("/course-slip/upload", (0, multer_1.getFileInRequest)("course-slip"), (0, checkFilePresence_Type_1.checkFilePresenceAndType)(["image/jpeg", "image/png", "application/pdf"]), verifyJwt_1.verifyJwt, courseDataControllers_1.couseSlipUploadController);
+exports.courseDataRouter.post("/course-slip/data/save", verifyJwt_1.verifyJwt, courseDataControllers_1.courseSlipInfoSaveController);
 // endpoint for uploading timeTable
 exports.courseDataRouter.post("/timeTable/upload", (0, multer_1.getFileInRequest)("timeTable"), (0, checkFilePresence_Type_1.checkFilePresenceAndType)(["image/jpeg", "image/png", "application/pdf"]), verifyJwt_1.verifyJwt, courseDataControllers_1.timeTableUploadController);
 exports.courseDataRouter.post("/timeTable/save", verifyJwt_1.verifyJwt, courseDataControllers_1.timeTableInfoSaveController);

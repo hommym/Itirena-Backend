@@ -12,16 +12,38 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.courseSlipInfoSaveController = exports.timeTableInfoSaveController = exports.timeTableUploadController = exports.couseSlipUploadController = void 0;
+exports.timeTableInfoSaveController = exports.timeTableUploadController = exports.courseSlipInfoSaveController = exports.couseSlipUploadController = void 0;
 const express_async_handler_1 = __importDefault(require("express-async-handler"));
 const logger_1 = require("../../components/logger");
 const AppError_1 = require("../../components/AppError");
 const userSchema_1 = require("../../schema/userSchema");
 const googleGemini_1 = require("../../libs/googleGemini");
+const courseSchema_1 = require("../../schema/courseSchema");
+const mongoose_1 = require("../../libs/mongoose");
+// helper methods
+const ValidateDataFormat = (courseData) => {
+    courseData.forEach((course) => {
+        const { courseCode, courseName, credit } = course;
+        if (!courseCode && !courseName && !credit)
+            throw new AppError_1.AppError("item(s) in courses in the request body is not in the required format", 400);
+    });
+    return true;
+};
 exports.couseSlipUploadController = (0, express_async_handler_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { buffer, mimetype } = req.file;
     let courseDataFromImage = JSON.parse(yield (0, googleGemini_1.getInfoFromCourseSlip)(buffer, mimetype));
     res.status(200).json(courseDataFromImage);
+}));
+exports.courseSlipInfoSaveController = (0, express_async_handler_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    (0, logger_1.loger)("Saving course data...");
+    const { courses, semester, academicYear, id } = req.body;
+    if (!courses || !semester || !academicYear)
+        throw new AppError_1.AppError(`No data passed for ${!courses ? "courses" : !semester ? "semester" : "academicYear"}`, 400);
+    // checking if the data sent is in th right format
+    if (ValidateDataFormat(courses))
+        yield courseSchema_1.CourseSchema.findOneAndUpdate({ userId: (0, mongoose_1.tObjectId)(id), semester, academicYear }, { $set: { userId: (0, mongoose_1.tObjectId)(id), courses, semester, academicYear } }, { upsert: true });
+    (0, logger_1.loger)("Data saved");
+    res.status(201).json({ message: "Course Data saved sucessfully" });
 }));
 exports.timeTableUploadController = (0, express_async_handler_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
@@ -39,4 +61,3 @@ exports.timeTableUploadController = (0, express_async_handler_1.default)((req, r
     // send the data from gemni back to the user for confirmation
 }));
 exports.timeTableInfoSaveController = (0, express_async_handler_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () { }));
-exports.courseSlipInfoSaveController = (0, express_async_handler_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () { }));
