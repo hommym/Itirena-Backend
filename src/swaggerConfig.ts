@@ -16,7 +16,11 @@ const option: swaggerJsdoc.Options = {
     tags: [
       {
         name: "Account",
-        description: "All operations relating to account",
+        description: "Contains endpoints for Account related operations such creation login etc",
+      },
+      {
+        name: "Courses",
+        description:"Contains endpoints for Course related operations such course&timeTable data extraction,saving etc"
       },
     ],
     components: {
