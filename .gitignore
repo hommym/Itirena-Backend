@@ -1,5 +1,4 @@
 /node_modules
 /src/test.ts 
 /.env
-/build
 prompt.txt

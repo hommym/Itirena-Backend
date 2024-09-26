@@ -2,8 +2,8 @@ import dotenv from "dotenv";
 dotenv.config();
 import { GoogleGenerativeAI, Part } from "@google/generative-ai";
 import { GoogleAIFileManager } from "@google/generative-ai/server";
-import { loger } from "../components/logger";
-import { AppError } from "../components/AppError";
+import { loger } from "../@global/helpers/logger";
+import { AppError } from "../@global/customErrors/AppError";
 
 const genAi = new GoogleGenerativeAI(process.env.GeminiApiKey!);
 const model = genAi.getGenerativeModel({
@@ -49,16 +49,15 @@ If yes return {"isImageValid":true} and if false return {"isImageValid":false}`;
   return resultsFromModel.response.text();
 };
 
-export const getInfoFromTimeTable = async (file: Buffer, mimeType: string,courses:string) => {
- const promptForCheckingImageValidity = `is this a timeTable?. If you think it is a timeTable return {isImageValid:true} and if you think is not return {isImageValid:false}`;
+export const getInfoFromTimeTable = async (file: Buffer, mimeType: string, courses: string) => {
+  const promptForCheckingImageValidity = `is this a timeTable?. If you think it is a timeTable return {isImageValid:true} and if you think is not return {isImageValid:false}`;
 
- const prompt = `Extract the data in the timeTable image base on this${courses} and return the data like this [{"day":"monday","startTime":"8:00","endTime":"9:55","course":"courseCode"}..]`;
+  const prompt = `Extract the data in the timeTable image base on this${courses} and return the data like this [{"day":"monday","startTime":"8:00","endTime":"9:55","course":"courseCode"}..]`;
   //   converting img buffer into GoogleGenerativeAI.Part object
   loger("The uploaded file is a img");
   loger("Creating an img object to be used together with the prompt..");
   const imgObject = { inlineData: { data: file.toString("base64"), mimeType } };
   loger("Object Created");
-
 
   loger("Checking if the image is valid first");
   let resultsFromModel = await model.generateContent([imgObject!, { text: promptForCheckingImageValidity }]);
@@ -66,11 +65,10 @@ export const getInfoFromTimeTable = async (file: Buffer, mimeType: string,course
     loger("Image not valid");
     throw new AppError("Image is not clear or is not a timeTable", 400);
   }
- loger("Image valid");
- resultsFromModel = await model.generateContent([imgObject!, { text: prompt }]);
- loger("Sending actual promt with the image..");
- loger("Sent");
- loger("Response received");
- return resultsFromModel.response.text();
-
+  loger("Image valid");
+  resultsFromModel = await model.generateContent([imgObject!, { text: prompt }]);
+  loger("Sending actual promt with the image..");
+  loger("Sent");
+  loger("Response received");
+  return resultsFromModel.response.text();
 };

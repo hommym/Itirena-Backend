@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 dotenv.config();
 import swaggerJsdoc from "swagger-jsdoc";
-import { loger } from "./components/logger";
+import { loger } from "./@global/helpers/logger";
 import path from "path";
 
 const option: swaggerJsdoc.Options = {
@@ -20,7 +20,7 @@ const option: swaggerJsdoc.Options = {
       },
       {
         name: "Courses",
-        description:"Contains endpoints for Course related operations such course&timeTable data extraction,saving etc"
+        description: "Contains endpoints for Course related operations such course&timeTable data extraction,saving etc",
       },
     ],
     components: {
@@ -37,5 +37,3 @@ const option: swaggerJsdoc.Options = {
 };
 
 export const swaggerSpecs = swaggerJsdoc(option);
-
-

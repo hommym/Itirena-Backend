@@ -15,9 +15,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.sendResetPasswordEmail = exports.sendConfirmationMessage = void 0;
 const nodemailer_1 = __importDefault(require("nodemailer"));
 const dotenv_1 = __importDefault(require("dotenv"));
-const userSchema_1 = require("../schema/userSchema");
+const userSchema_1 = require("../infrastructure/database/schema/userSchema");
 const jwt_1 = require("./jwt");
-const logger_1 = require("../components/logger");
+const logger_1 = require("../@global/helpers/logger");
 dotenv_1.default.config();
 const transporter = nodemailer_1.default.createTransport({
     service: "Gmail",

@@ -2,12 +2,12 @@ import express from "express";
 import dotenv from "dotenv";
 dotenv.config();
 import { connectToDatabase } from "./libs/mongoose";
-import { authRouter } from "./routes/auth/authRoutes";
-import { errorHandler } from "./middleware/errorHandler";
+import { authRouter } from "./interface/routes/authRoutes";
+import { errorHandler } from "./interface/middleware/errorHandler";
 import swaggerUi from "swagger-ui-express";
 import { swaggerSpecs } from "./swaggerConfig";
-import { loger } from "./components/logger";
-import { courseDataRouter } from "./routes/courseData/courseDataRoutes";
+import { loger } from "./@global/helpers/logger";
+import { courseDataRouter } from "./interface/routes/courseDataRoutes";
 
 const app = express();
 
@@ -19,7 +19,7 @@ app.use(express.json());
 
 // routes
 app.use("/api/v1/auth/", authRouter);
-app.use("/api/v1/course-data/",courseDataRouter)
+app.use("/api/v1/course-data/", courseDataRouter);
 
 // error handling middlware
 app.use(errorHandler);

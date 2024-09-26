@@ -16,12 +16,12 @@ const express_1 = __importDefault(require("express"));
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 const mongoose_1 = require("./libs/mongoose");
-const authRoutes_1 = require("./routes/auth/authRoutes");
-const errorHandler_1 = require("./middleware/errorHandler");
+const authRoutes_1 = require("./interface/routes/authRoutes");
+const errorHandler_1 = require("./interface/middleware/errorHandler");
 const swagger_ui_express_1 = __importDefault(require("swagger-ui-express"));
 const swaggerConfig_1 = require("./swaggerConfig");
-const logger_1 = require("./components/logger");
-const courseDataRoutes_1 = require("./routes/courseData/courseDataRoutes");
+const logger_1 = require("./@global/helpers/logger");
+const courseDataRoutes_1 = require("./interface/routes/courseDataRoutes");
 const app = (0, express_1.default)();
 // setting up swagger-ui
 app.use("/api-docs", swagger_ui_express_1.default.serve, swagger_ui_express_1.default.setup(swaggerConfig_1.swaggerSpecs));

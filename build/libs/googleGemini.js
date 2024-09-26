@@ -16,8 +16,8 @@ exports.getInfoFromTimeTable = exports.getInfoFromCourseSlip = void 0;
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 const generative_ai_1 = require("@google/generative-ai");
-const logger_1 = require("../components/logger");
-const AppError_1 = require("../components/AppError");
+const logger_1 = require("../@global/helpers/logger");
+const AppError_1 = require("../@global/customErrors/AppError");
 const genAi = new generative_ai_1.GoogleGenerativeAI(process.env.GeminiApiKey);
 const model = genAi.getGenerativeModel({
     model: "gemini-1.5-flash",

@@ -24,7 +24,7 @@ const option = {
             },
             {
                 name: "Courses",
-                description: "Contains endpoints for Course related operations such course&timeTable data extraction,saving etc"
+                description: "Contains endpoints for Course related operations such course&timeTable data extraction,saving etc",
             },
         ],
         components: {
