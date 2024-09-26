@@ -12,20 +12,22 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.errorHandler = void 0;
 const AppError_1 = require("../components/AppError");
 const errorHandler = (err, req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        if (err instanceof AppError_1.AppError) {
-            if (err.statusCode) {
-                res.status(err.statusCode);
-            }
+    if (err instanceof AppError_1.AppError) {
+        if (err.statusCode)
+            res.status(err.statusCode);
+        try {
             // converting json in string form in json object
             const jsonErrorMessage = JSON.parse(err.msg);
             res.json(jsonErrorMessage);
         }
-        else {
+        catch (error) {
             res.json({ error: err.message });
         }
     }
-    catch (error) {
+    else if (err instanceof SyntaxError) {
+        res.status(400).json({ error: err.message });
+    }
+    else {
         res.json({ error: err.message });
     }
 });
