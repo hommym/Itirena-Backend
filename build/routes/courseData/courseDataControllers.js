@@ -31,7 +31,7 @@ const ValidateDataFormat = (courseData) => {
 };
 exports.couseSlipUploadController = (0, express_async_handler_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { buffer, mimetype } = req.file;
-    let courseDataFromImage = JSON.parse(yield (0, googleGemini_1.getInfoFromCourseSlip)(buffer, mimetype));
+    const courseDataFromImage = JSON.parse(yield (0, googleGemini_1.getInfoFromCourseSlip)(buffer, mimetype));
     res.status(200).json(courseDataFromImage);
 }));
 exports.courseSlipInfoSaveController = (0, express_async_handler_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -43,21 +43,21 @@ exports.courseSlipInfoSaveController = (0, express_async_handler_1.default)((req
     if (ValidateDataFormat(courses))
         yield courseSchema_1.CourseSchema.findOneAndUpdate({ userId: (0, mongoose_1.tObjectId)(id), semester, academicYear }, { $set: { userId: (0, mongoose_1.tObjectId)(id), courses, semester, academicYear } }, { upsert: true });
     (0, logger_1.loger)("Data saved");
+    yield userSchema_1.UserSchema.findOneAndUpdate({ _id: (0, mongoose_1.tObjectId)(id) }, { $set: { isCourseSlipPresent: true } });
     res.status(201).json({ message: "Course Data saved sucessfully" });
 }));
 exports.timeTableUploadController = (0, express_async_handler_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
-    const imgFile = (_a = req.file) === null || _a === void 0 ? void 0 : _a.buffer;
+    const { buffer, mimetype } = req.file;
     const { id } = req.body;
     (0, logger_1.loger)("Checking if course slip is present");
     const accountInfo = yield userSchema_1.UserSchema.findById(id);
     if (!(accountInfo === null || accountInfo === void 0 ? void 0 : accountInfo.isCourseSlipPresent)) {
         res.status(400);
-        throw new AppError_1.AppError(`{"errType":"Request Error","message":"No course slip for current year has been uploaded"}`);
+        throw new AppError_1.AppError("No course data found ,course data must be present before timeTable upload", 404);
     }
-    // check database for course slip data and store in a variable
-    // using the data in the course slip create the pompt you will e using
-    // code to send image together with the prompt to gemni to extract the data in the image and put it in json
-    // send the data from gemni back to the user for confirmation
+    const courses = (_a = (yield courseSchema_1.CourseSchema.findOne({ userId: (0, mongoose_1.tObjectId)(id) }))) === null || _a === void 0 ? void 0 : _a.courses;
+    const timeTableDataFromImage = JSON.parse(yield (0, googleGemini_1.getInfoFromTimeTable)(buffer, mimetype, JSON.stringify(courses)));
+    res.status(200).json(timeTableDataFromImage);
 }));
 exports.timeTableInfoSaveController = (0, express_async_handler_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () { }));

@@ -3,8 +3,8 @@ import { Request, Response, NextFunction } from "express";
 import { loger } from "../../components/logger";
 import { AppError } from "../../components/AppError";
 import { UserSchema } from "../../schema/userSchema";
-import { getInfoFromCourseSlip } from "../../libs/googleGemini";
-import { Course, ModelJsonResponse } from "../../components/customDataTypes/courseSlipDataType";
+import { getInfoFromCourseSlip, getInfoFromTimeTable } from "../../libs/googleGemini";
+import { Course } from "../../components/customDataTypes/courseSlipDataType";
 import { CourseSchema } from "../../schema/courseSchema";
 import { tObjectId } from "../../libs/mongoose";
 
@@ -19,43 +19,39 @@ const ValidateDataFormat = (courseData: Array<Course>) => {
 
 export const couseSlipUploadController = asyncHandler(async (req: Request, res: Response) => {
   const { buffer, mimetype } = req.file!;
-  let courseDataFromImage: ModelJsonResponse = JSON.parse(await getInfoFromCourseSlip(buffer, mimetype));
+  const courseDataFromImage = JSON.parse(await getInfoFromCourseSlip(buffer, mimetype));
   res.status(200).json(courseDataFromImage);
 });
 
 export const courseSlipInfoSaveController = asyncHandler(async (req: Request, res: Response) => {
-  loger("Saving course data...")
+  loger("Saving course data...");
   const { courses, semester, academicYear, id } = req.body;
 
   if (!courses || !semester || !academicYear) throw new AppError(`No data passed for ${!courses ? "courses" : !semester ? "semester" : "academicYear"}`, 400);
 
   // checking if the data sent is in th right format
-  if (ValidateDataFormat(courses)) await CourseSchema.findOneAndUpdate({ userId: tObjectId(id), semester, academicYear}, { $set: { userId: tObjectId(id), courses, semester, academicYear } },{upsert:true});
-  loger("Data saved")
+  if (ValidateDataFormat(courses))
+    await CourseSchema.findOneAndUpdate({ userId: tObjectId(id), semester, academicYear }, { $set: { userId: tObjectId(id), courses, semester, academicYear } }, { upsert: true });
+  loger("Data saved");
+  await UserSchema.findOneAndUpdate({ _id: tObjectId(id) }, { $set: { isCourseSlipPresent: true } });
   res.status(201).json({ message: "Course Data saved sucessfully" });
 });
 
-
-
-
 export const timeTableUploadController = asyncHandler(async (req: Request, res: Response) => {
-  const imgFile = req.file?.buffer;
+  const { buffer, mimetype } = req.file!;
   const { id } = req.body;
 
   loger("Checking if course slip is present");
   const accountInfo = await UserSchema.findById(id);
   if (!accountInfo?.isCourseSlipPresent) {
     res.status(400);
-    throw new AppError(`{"errType":"Request Error","message":"No course slip for current year has been uploaded"}`);
+    throw new AppError("No course data found ,course data must be present before timeTable upload", 404);
   }
 
-  // check database for course slip data and store in a variable
+  const courses = (await CourseSchema.findOne({ userId: tObjectId(id) }))?.courses;
 
-  // using the data in the course slip create the pompt you will e using
-
-  // code to send image together with the prompt to gemni to extract the data in the image and put it in json
-
-  // send the data from gemni back to the user for confirmation
+  const timeTableDataFromImage = JSON.parse(await getInfoFromTimeTable(buffer, mimetype, JSON.stringify(courses)));
+  res.status(200).json(timeTableDataFromImage);
 });
 
 export const timeTableInfoSaveController = asyncHandler(async (req: Request, res: Response) => {});
