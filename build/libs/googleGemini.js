@@ -12,16 +12,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getInfoFromCourseSlip = void 0;
+exports.getInfoFromTimeTable = exports.getInfoFromCourseSlip = void 0;
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 const generative_ai_1 = require("@google/generative-ai");
 const logger_1 = require("../components/logger");
 const AppError_1 = require("../components/AppError");
+const genAi = new generative_ai_1.GoogleGenerativeAI(process.env.GeminiApiKey);
+const model = genAi.getGenerativeModel({
+    model: "gemini-1.5-flash",
+    generationConfig: { temperature: 0, topP: 0.95, topK: 64, maxOutputTokens: 8192, responseMimeType: "application/json" },
+    systemInstruction: "The response should only contain the json data.",
+});
 const getInfoFromCourseSlip = (file, mimeType) => __awaiter(void 0, void 0, void 0, function* () {
-    let fileUri = "";
-    let imgObject;
-    const genAi = new generative_ai_1.GoogleGenerativeAI(process.env.GeminiApiKey);
     const promptForCheckingImageValidity = `1.For an image to be considered a course slip image , it needs to have or be
 a. Clear with all the text capable of been seen . 
 b. A known number of courses with their course-code present
@@ -39,18 +42,13 @@ If yes return {"isImageValid":true} and if false return {"isImageValid":false}`;
     //   converting img buffer into GoogleGenerativeAI.Part object
     (0, logger_1.loger)("The uploaded file is a img");
     (0, logger_1.loger)("Creating an img object to be used together with the prompt..");
-    imgObject = { inlineData: { data: file.toString("base64"), mimeType } };
+    const imgObject = { inlineData: { data: file.toString("base64"), mimeType } };
     (0, logger_1.loger)("Object Created");
-    const model = genAi.getGenerativeModel({
-        model: "gemini-1.5-pro",
-        generationConfig: { temperature: 0, topP: 0.95, topK: 64, maxOutputTokens: 8192, responseMimeType: "application/json" },
-        systemInstruction: "The response should only contain the json data.",
-    });
     (0, logger_1.loger)("Checking if the image is valid first");
     let resultsFromModel = yield model.generateContent([imgObject, { text: promptForCheckingImageValidity }]);
-    if (!(JSON.parse(resultsFromModel.response.text()).isImageValid)) {
+    if (!JSON.parse(resultsFromModel.response.text()).isImageValid) {
         (0, logger_1.loger)("Image not valid");
-        throw new AppError_1.AppError(`{"errType":"Request Error","message":"The image is not clear or a course slip"}`, 400);
+        throw new AppError_1.AppError(`The image is not clear or a course slip`, 400);
     }
     (0, logger_1.loger)("Image valid");
     resultsFromModel = yield model.generateContent([imgObject, { text: prompt }]);
@@ -60,3 +58,25 @@ If yes return {"isImageValid":true} and if false return {"isImageValid":false}`;
     return resultsFromModel.response.text();
 });
 exports.getInfoFromCourseSlip = getInfoFromCourseSlip;
+const getInfoFromTimeTable = (file, mimeType, courses) => __awaiter(void 0, void 0, void 0, function* () {
+    const promptForCheckingImageValidity = `is this a timeTable?. If you think it is a timeTable return {isImageValid:true} and if you think is not return {isImageValid:false}`;
+    const prompt = `Extract the data in the timeTable image base on this${courses} and return the data like this [{"day":"monday","startTime":"8:00","endTime":"9:55","course":"courseCode"}..]`;
+    //   converting img buffer into GoogleGenerativeAI.Part object
+    (0, logger_1.loger)("The uploaded file is a img");
+    (0, logger_1.loger)("Creating an img object to be used together with the prompt..");
+    const imgObject = { inlineData: { data: file.toString("base64"), mimeType } };
+    (0, logger_1.loger)("Object Created");
+    (0, logger_1.loger)("Checking if the image is valid first");
+    let resultsFromModel = yield model.generateContent([imgObject, { text: promptForCheckingImageValidity }]);
+    if (!JSON.parse(resultsFromModel.response.text()).isImageValid) {
+        (0, logger_1.loger)("Image not valid");
+        throw new AppError_1.AppError("Image is not clear or is not a timeTable", 400);
+    }
+    (0, logger_1.loger)("Image valid");
+    resultsFromModel = yield model.generateContent([imgObject, { text: prompt }]);
+    (0, logger_1.loger)("Sending actual promt with the image..");
+    (0, logger_1.loger)("Sent");
+    (0, logger_1.loger)("Response received");
+    return resultsFromModel.response.text();
+});
+exports.getInfoFromTimeTable = getInfoFromTimeTable;
